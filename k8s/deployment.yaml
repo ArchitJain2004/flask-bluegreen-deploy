@@ -1,0 +1,68 @@
+# Blue Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-blue-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask
+      color: blue
+  template:
+    metadata:
+      labels:
+        app: flask
+        color: blue
+    spec:
+      containers:
+      - name: flask-blue-app
+        image: architjain04/flask-bluegreen-app:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: APP_COLOR
+          value: "blue"
+
+# Green Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-green-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask
+      color: green
+  template:
+    metadata:
+      labels:
+        app: flask
+        color: green
+    spec:
+      containers:
+      - name: flask-green-app
+        image: architjain04/flask-bluegreen-app:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: APP_COLOR
+          value: "green"
+
+# Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+spec:
+  selector:
+    app: flask
+    color: blue  # initially points to blue
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
